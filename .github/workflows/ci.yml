@@ -1,39 +1,59 @@
-name: partie I
+name: Partie II
+
 on:
-push:
-  braches:
-    - main
-pull-request:
-  branches:
-    - main
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Recuperer code
-        uses: actions/checkout@4
-      - name: installer py 3.11
-        uses: actions/setup-python@5
-      - name: installer dependances
-        run: pip installl -r requirements.txt
-      - name: installer flake
+      - uses: actions/checkout@v4
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install les dependances
+        run: pip install -r requirements.txt
+      - name: install flake8
         run: pip install flake8
-      - name: lancer lint
+      - name: Execute lint sur tests/ et app/
         run: |
-          flake8 app --count 00select-E9,F63,F7,F82,F831 --show-source --statistics
-          flake8 app --count --max-complexity=10 --max-line-length=127 --statistics
-          flake8 tests --count --max-line -length=127 --statistics
+          flake8 app --count --select=E9,F63,F7,F82,F841 --show-source --statistics
+          flake8 app --max-complexity=10 --max-line-length=127 --statistics
+          flake8 tests --count --max-line-length=127 --statistics
+
   test:
     runs-on: ubuntu-latest
     needs: lint
     steps:
-      - name: Recuperer code
-        uses: actions/checkout@4
-      - name: installer py 3.11
-        uses: actions/setup-python@5
-      - name: installer dependances
-        run: pip installl -r requirements.txt
-      - name: lancer test
-        run: python -m -pytest -v --cov=app
-  build: 
+      - uses: actions/checkout@v4
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install les dependances
+        run: pip install -r requirements.txt
+      - name: Execute les tests
+        run: python -m pytest --cov=app tests/
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install build
+        run: pip install build
+      - name: Generer le package python
+        run: python -m build
+      - name: Upload le resultat de build
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package
+          path: dist/
