@@ -1,11 +1,11 @@
 name: partie I
 on:
-push:
-  braches:
-    - main
-pull-request:
-  branches:
-    - main
+  push:
+    branches:
+      - main
+    pull-request:
+    branches:
+      - main
 
 jobs:
   build:
